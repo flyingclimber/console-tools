@@ -3,8 +3,15 @@
 """readsystemid - Simple MegaCD system id reader"""
 
 import io
+import argparse
 
-DATAFILE = io.FileIO('test.iso','r')
+PARSER = argparse.ArgumentParser(description='Simple MegaCd system id reader')
+PARSER.add_argument('filename', metavar='filename', type=str,
+                   help='cd image to read')
+
+ARGS = PARSER.parse_args()
+
+DATAFILE = io.FileIO(ARGS.filename,'r')
 
 DISCIDENTIFIER = DATAFILE.read(0x10)
 SEGASYSTEMDISC = DATAFILE.read(0xB)
