@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-"""readSystemID - Simple MegaCD system id reader"""
+"""readsystemid - Simple MegaCD system id reader"""
 
 SECTORSIZE = 2048
 SECTORSTOREAD = 1
