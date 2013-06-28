@@ -30,7 +30,7 @@ print 'System type: ' + SEGASYSTEMDISC
 print 'Data disc: ' + DATADISC
 print 'System name: ' + SYSTEMNAME
 print 'Copyright: ' + COPYRIGHT
-print 'Domestic name: ' + DOMESTICNAME
+print 'Domestic name: ' + DOMESTICNAME.decode('shift-jis')
 print 'Overseas name: ' + OVERSEASNAME
 print 'Game type: ' + GAMETYPE
 print 'Game reference: ' + GAMEREFERENCE
