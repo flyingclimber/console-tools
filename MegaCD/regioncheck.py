@@ -11,19 +11,19 @@ PARSER.add_argument('filename', metavar='filename', type=str,
 
 ARGS = PARSER.parse_args()
 
-USA = 0x43
-JAP = 0x21
-EUR = 0x43
+USA = '43fa000a4eb803646000057a60'
+JAP = '21fc00000280fd024bf900a120'
+EUR = '43fa000a4eb803646000056460'
 
 DATAFILE = io.FileIO(ARGS.filename,'r')
 
-DATAFILE.seek(0x20b)
+DATAFILE.seek(0x200)
 
-STRIP = DATAFILE.read(1)
+STRIP = DATAFILE.read(13)
 
-if STRIP == chr(0x7a): 
+if STRIP.encode('hex') == USA:
     print 'USA'
-if STRIP == chr(0xa1):
+if STRIP.encode('hex') == JAP:
     print 'JAP'
-if STRIP == chr(0x64):
+if STRIP.encode('hex') == EUR:
     print 'EUR'
