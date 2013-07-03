@@ -17,6 +17,30 @@ EUR = '43fa000a4eb803646000056460'
 
 DATAFILE = io.FileIO(ARGS.filename,'r')
 
+def _findemptyregions():
+    '''_findemptyregions - scans an ISO for LENGTH byte to find zeros or
+        spaces
+    '''
+    zero = '\x00\x00\x00\x00\x00\x00\x00\x00'
+    space = '\x20\x20\x20\x20\x20\x20\x20\x20'
+    length = 8
+    found = False
+
+    DATAFILE.seek(0)
+    byte = DATAFILE.read(length)
+
+    while byte:
+        if byte == zero or byte == space:
+            if found != True:
+                start = DATAFILE.tell() - length
+                found = True
+        elif found == True:
+            end = DATAFILE.tell() - length
+            print start, "-", end, "|", end - start
+            found = False
+
+        byte = DATAFILE.read(8)
+
 DATAFILE.seek(0x200)
 
 STRIP = DATAFILE.read(13)
@@ -27,3 +51,5 @@ if STRIP.encode('hex') == JAP:
     print 'JAP'
 if STRIP.encode('hex') == EUR:
     print 'EUR'
+
+_findemptyregions()
