@@ -61,15 +61,17 @@ def _findemptyregions():
 
         byte = DATAFILE.read(8)
 
-DATAFILE.seek(0x200)
+def _findregion():
+    DATAFILE.seek(0x200)
 
-STRIP = DATAFILE.read(13)
+    STRIP = DATAFILE.read(13)
 
-if STRIP.encode('hex') == USA:
-    print 'USA'
-if STRIP.encode('hex') == JAP:
-    print 'JAP'
-if STRIP.encode('hex') == EUR:
-    print 'EUR'
+    if STRIP.encode('hex') == USA:
+        print 'USA'
+    if STRIP.encode('hex') == JAP:
+        print 'JAP'
+    if STRIP.encode('hex') == EUR:
+        print 'EUR'
 
+_findregion()
 _findemptyregions()
