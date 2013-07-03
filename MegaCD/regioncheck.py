@@ -22,7 +22,7 @@
     regionchecker - detect which region this iso is currently set for
 '''
 
-import io
+import io, os
 import argparse
 
 PARSER = argparse.ArgumentParser(description='MegaCd region checker')
@@ -37,19 +37,20 @@ EUR = '43fa000a4eb803646000056460'
 
 DATAFILE = io.FileIO(ARGS.filename,'r')
 
-def _findemptyregions():
+def _findemptyregions(filebegin=0, fileend=os.stat(ARGS.filename).st_size):
     '''_findemptyregions - scans an ISO for LENGTH byte to find zeros or
         spaces
     '''
+
     zero = '\x00\x00\x00\x00\x00\x00\x00\x00'
     space = '\x20\x20\x20\x20\x20\x20\x20\x20'
     length = 8
     found = False
 
-    DATAFILE.seek(0)
+    DATAFILE.seek(filebegin)
     byte = DATAFILE.read(length)
 
-    while byte:
+    while DATAFILE.tell() != fileend:
         if byte == zero or byte == space:
             if found != True:
                 start = DATAFILE.tell() - length
@@ -62,16 +63,20 @@ def _findemptyregions():
         byte = DATAFILE.read(8)
 
 def _findregion():
+    '''_findregion - find the region of a megacd game'''
+
     DATAFILE.seek(0x200)
+    strip = DATAFILE.read(13)
 
-    STRIP = DATAFILE.read(13)
-
-    if STRIP.encode('hex') == USA:
+    if strip.encode('hex') == USA:
         print 'USA'
-    if STRIP.encode('hex') == JAP:
+    if strip.encode('hex') == JAP:
         print 'JAP'
-    if STRIP.encode('hex') == EUR:
+    if strip.encode('hex') == EUR:
         print 'EUR'
 
-_findregion()
-_findemptyregions()
+def _main():
+    _findregion()
+    _findemptyregions()
+
+_main()
