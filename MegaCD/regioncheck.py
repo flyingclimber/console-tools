@@ -22,7 +22,7 @@
     regionchecker - detect which region this iso is currently set for
 '''
 
-import io, os
+import io, os, sys
 import argparse
 
 PARSER = argparse.ArgumentParser(description='MegaCd region checker')
@@ -36,6 +36,7 @@ JAP = '21fc00000280fd024bf900a120'
 EUR = '43fa000a4eb803646000056460'
 
 DATAFILE = io.FileIO(ARGS.filename,'r')
+CONVERTEDISO = io.FileIO('converted.iso','w')
 
 def _findemptyregions(filebegin=0, fileend=os.stat(ARGS.filename).st_size):
     '''_findemptyregions - scans an ISO for LENGTH byte to find zeros or
@@ -63,7 +64,7 @@ def _findemptyregions(filebegin=0, fileend=os.stat(ARGS.filename).st_size):
         byte = DATAFILE.read(8)
 
 def _findregion():
-    '''_findregion - find the region of a megacd game'''
+    '''_findregion - find the region of a MegaCD game'''
 
     DATAFILE.seek(0x200)
     strip = DATAFILE.read(13)
@@ -75,8 +76,53 @@ def _findregion():
     if strip.encode('hex') == EUR:
         print 'EUR'
 
+def _convertregion(newregion=str, oldregion=str):
+    '''_convertregions - convert from one region to another'''
+
+    if newregion == 'USA':
+        if oldregion == 'EUR':
+            _copybase(DATAFILE, CONVERTEDISO, 'EUR', 'USA')
+        elif oldregion == 'JAP':
+            _copybase(DATAFILE, CONVERTEDISO, 'JAP', 'USA')
+    elif newregion == 'JAP':
+        if oldregion == 'USA':
+            _copybase(DATAFILE, CONVERTEDISO, 'USA', 'JAP')
+        if oldregion == 'EUR':
+            _copybase(DATAFILE, CONVERTEDISO, 'EUR', 'JAP')
+    elif newregion == 'EUR':
+        if oldregion == 'USA':
+            _copybase(DATAFILE, CONVERTEDISO, 'USA', 'EUR')
+        if oldregion == 'JAP':
+            _copybase(DATAFILE, CONVERTEDISO, 'JAP', 'EUR')
+    else:
+        print "Invalid region"
+
+def _copybase(sourceiso=io.FileIO, newiso=io.FileIO, oldregion=str, 
+        newregion=str):
+    '''_copybase - build the base image'''
+
+    if newregion == 'USA':
+        propbin = 'us_prop.bin'
+    elif newregion == 'JAP':
+        propbin = 'jp_prop.bin'
+    elif newregion == 'EUR':
+        propbin = 'eu_prop.bin'
+    else:
+        print "Unknown region. Aborting"
+        sys.exit()
+
+    prop = io.FileIO(propbin, 'r')
+    print "Converting from " + oldregion + " to " + newregion
+    sourceiso.seek(0) # rewind for copy
+    newiso.write(DATAFILE.read(512)) # everything up to region code
+    newiso.write(prop.read()) # new region code
+    sourceiso.seek(4096) # wind to the game code
+    newiso.seek(4096)
+    newiso.write(sourceiso.read()) # write the rest
+    newiso.close()
+
 def _main():
-    _findregion()
-    _findemptyregions()
+    '''_main - master of all'''
+    _convertregion('USA','JAP')
 
 _main()
