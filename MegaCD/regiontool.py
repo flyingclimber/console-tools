@@ -19,15 +19,19 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-    regionchecker - detect which region this iso is currently set for
+    regiontool - multi purpose MegaCD region tool
 '''
 
 import io, os, sys
 import argparse
 
-PARSER = argparse.ArgumentParser(description='MegaCd region checker')
+PARSER = argparse.ArgumentParser(description='MegaCd region tool')
 PARSER.add_argument('filename', metavar='filename', type=str,
-                   help='cd image to read')
+                    help='cd image to read')
+PARSER.add_argument('-c', '--convert', action="store_true",
+                    help='convert to a new region')
+PARSER.add_argument('-n', choices=['USA', 'JAP', 'EUR'],
+                    help='name of new region')
 
 ARGS = PARSER.parse_args()
 
@@ -70,11 +74,11 @@ def _findregion():
     strip = DATAFILE.read(13)
 
     if strip.encode('hex') == USA:
-        print 'USA'
+        return 'USA'
     if strip.encode('hex') == JAP:
-        print 'JAP'
+        return 'JAP'
     if strip.encode('hex') == EUR:
-        print 'EUR'
+        return 'EUR'
 
 def _convertregion(newregion=str, oldregion=str):
     '''_convertregions - convert from one region to another'''
@@ -123,6 +127,16 @@ def _copybase(sourceiso=io.FileIO, newiso=io.FileIO, oldregion=str,
 
 def _main():
     '''_main - master of all'''
-    _convertregion('USA','JAP')
+
+    if ARGS.convert:
+        newregion = ARGS.n
+        oldregion = _findregion()
+
+        if oldregion != newregion:
+            _convertregion(newregion, oldregion)
+        else:
+            print "No point in converting to the same region"
+    else:
+        print _findregion()
 
 _main()
