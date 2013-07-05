@@ -117,11 +117,13 @@ def _copybase(sourceiso=io.FileIO, newiso=io.FileIO, oldregion=str,
 
     prop = io.FileIO(propbin, 'r')
     print "Converting from " + oldregion + " to " + newregion
+    sourceiso.seek(0x40)
+    gameentry = int((sourceiso.read(4)).encode('hex'))
     sourceiso.seek(0) # rewind for copy
     newiso.write(DATAFILE.read(512)) # everything up to region code
     newiso.write(prop.read()) # new region code
-    sourceiso.seek(4096) # wind to the game code
-    newiso.seek(4096)
+    sourceiso.seek(gameentry) # wind to the game code
+    newiso.seek(gameentry)
     newiso.write(sourceiso.read()) # write the rest
     newiso.close()
 
