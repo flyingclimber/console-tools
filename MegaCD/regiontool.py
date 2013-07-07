@@ -101,9 +101,34 @@ def _convertregion(newregion=str, oldregion=str):
     else:
         print "Invalid region"
 
+def _findnextgap(start):
+    '''_findnextgap - given a location find the next 8byte gap'''
+    
+    DATAFILE.seek(start)
+    count = 0;
+    zero = '\x00\x00'
+    space = '\x20\x20'
+
+    while count < 4:
+        buffer = DATAFILE.read(2)
+
+        if buffer == zero or buffer == space:
+            count += 1
+        else: 
+            count = 0
+
+    if count == 4:
+        pos = DATAFILE.tell() - 8
+        return pos
+    else:
+        return None
+
+
 def _copybase(sourceiso=io.FileIO, newiso=io.FileIO, oldregion=str, 
         newregion=str):
     '''_copybase - build the base image'''
+
+    baselength = 512
 
     if newregion == 'USA':
         propbin = 'us_prop.bin'
@@ -115,16 +140,44 @@ def _copybase(sourceiso=io.FileIO, newiso=io.FileIO, oldregion=str,
         print "Unknown region. Aborting"
         sys.exit()
 
-    prop = io.FileIO(propbin, 'r')
+    if oldregion == 'USA':
+        oldpropbin = 'us_prop.bin'
+    elif oldregion == 'JAP':
+        oldpropbin = 'jp_prop.bin'
+    elif oldregion == 'EUR':
+        oldpropbin = 'eu_prop.bin'
+    else:
+        print "Unknown region. Aborting"
+        sys.exit()
+
+
+    # prep work #
     print "Converting from " + oldregion + " to " + newregion
+    prop = io.FileIO(propbin, 'r')
     sourceiso.seek(0x40)
     gameentry = int((sourceiso.read(4)).encode('hex'))
+
+    # write header # 
     sourceiso.seek(0) # rewind for copy
-    newiso.write(DATAFILE.read(512)) # everything up to region code
+    newiso.write(sourceiso.read(baselength)) # everything up to region code
+
+    # write new region code #
     newiso.write(prop.read()) # new region code
+
+    # write post region code #
+    loaderstart = baselength + os.stat(oldpropbin).st_size
+    sourceiso.seek(loaderstart) # wind source to just past region code
+    loaderend = _findnextgap(sourceiso.tell()) # get length of post region code
+    sourceiso.seek(loaderstart) # re-wind source to just past region code
+    newiso.write(sourceiso.read(loaderend - loaderstart))
+
+    # write rest of iso #
+    gameentry = 4096 # BUG: this should be dynamic
     sourceiso.seek(gameentry) # wind to the game code
     newiso.seek(gameentry)
     newiso.write(sourceiso.read()) # write the rest
+
+    # cleanup #
     newiso.close()
 
 def _main():
