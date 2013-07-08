@@ -85,11 +85,11 @@ def _findregion():
     strip = DATAFILE.read(13)
 
     if strip.encode('hex') == USA:
-        return 'USA'
+        return USAREGION
     if strip.encode('hex') == JAP:
-        return 'JAP'
+        return JAPREGION
     if strip.encode('hex') == EUR:
-        return 'EUR'
+        return EURREGION
 
 def _convertregion(newregion=str, oldregion=str):
     '''_convertregions - convert from one region to another'''
@@ -146,7 +146,7 @@ def _copybase(sourceiso=io.FileIO, newiso=io.FileIO, oldregion=str,
     elif newregion == JAPREGION:
         propbin = JAPPROPBIN
     elif newregion == EURREGION:
-        propbin = EUPROPBIN
+        propbin = EURPROPBIN
     else:
         print "Unknown region. Aborting"
         sys.exit()
