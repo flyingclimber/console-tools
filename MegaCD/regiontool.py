@@ -51,7 +51,6 @@ EURPROPBIN = 'eu_prop.bin'
 
 # File hanldes
 DATAFILE = io.FileIO(ARGS.filename,'r')
-CONVERTEDISO = io.FileIO('converted.iso','w')
 
 def _findemptyregions(filebegin=0, fileend=os.stat(ARGS.filename).st_size):
     '''_findemptyregions - scans an ISO for LENGTH byte to find zeros or
@@ -93,6 +92,8 @@ def _findregion():
 
 def _convertregion(newregion=str, oldregion=str):
     '''_convertregions - convert from one region to another'''
+
+    CONVERTEDISO = io.FileIO('converted.iso','w')
 
     if newregion == USAREGION:
         if oldregion == EURREGION:
