@@ -35,10 +35,6 @@ PARSER.add_argument('-n', choices=['USA', 'JAP', 'EUR'],
 
 ARGS = PARSER.parse_args()
 
-USA = '43fa000a4eb803646000057a60'
-JAP = '21fc00000280fd024bf900a120'
-EUR = '43fa000a4eb803646000056460'
-
 # Regions we support converting to/from
 USAREGION = 'USA'
 JAPREGION = 'JAP'
@@ -77,18 +73,28 @@ def _findemptyregions(filebegin=0, fileend=os.stat(ARGS.filename).st_size):
 
         byte = DATAFILE.read(8)
 
-def _findregion():
+def _findregion(sourceiso=io.FileIO):
     '''_findregion - find the region of a MegaCD game'''
 
-    DATAFILE.seek(0x200)
-    strip = DATAFILE.read(13)
+    sourceiso.seek(0x200)
+    strip = sourceiso.read(13)
 
-    if strip.encode('hex') == USA:
-        return USAREGION
-    if strip.encode('hex') == JAP:
-        return JAPREGION
-    if strip.encode('hex') == EUR:
-        return EURREGION
+    USAP = io.FileIO(USAPROPBIN, 'r')
+    JAPP = io.FileIO(JAPPROPBIN, 'r')
+    EURP = io.FileIO(EURPROPBIN, 'r')
+
+    if strip == USAP.read(13):
+        region = USAREGION
+    elif strip == JAPP.read(13):
+        region = JAPREGION
+    elif strip == EURP.read(13):
+        region = EURREGION
+
+    USAP.close()
+    JAPP.close()
+    EURP.close()
+
+    return region
 
 def _convertregion(newregion=str, oldregion=str):
     '''_convertregions - convert from one region to another'''
@@ -135,33 +141,27 @@ def _findnextgap(start):
     else:
         return None
 
+def _getpropbin(region):
+    '''_getpropbin - given a region return the corresponding propbin'''
 
-def _copybase(sourceiso=io.FileIO, newiso=io.FileIO, oldregion=str, 
+    if region == USAREGION:
+        return USAPROPBIN
+    elif region == JAPREGION:
+        return JAPPROPBIN
+    elif region == EURREGION:
+        return EURPROPBIN
+    else:
+        print "Unknown region. Aborting"
+        sys.exit()
+
+def _copybase(sourceiso=io.FileIO, newiso=io.FileIO, oldregion=str,
         newregion=str):
     '''_copybase - build the base image'''
 
     baselength = 512
 
-    if newregion == USAREGION:
-        propbin = USAPROPBIN
-    elif newregion == JAPREGION:
-        propbin = JAPPROPBIN
-    elif newregion == EURREGION:
-        propbin = EURPROPBIN
-    else:
-        print "Unknown region. Aborting"
-        sys.exit()
-
-    if oldregion == USAREGION:
-        oldpropbin = USAPROPBIN
-    elif oldregion == JAPREGION:
-        oldpropbin = JAPPROPBIN
-    elif oldregion == EURREGION:
-        oldpropbin = EURPROPBIN
-    else:
-        print "Unknown region. Aborting"
-        sys.exit()
-
+    propbin = _getpropbin(newregion)
+    oldpropbin = _getpropbin(oldregion)
 
     # prep work #
     print "Converting from " + oldregion + " to " + newregion
@@ -197,13 +197,13 @@ def _main():
 
     if ARGS.convert:
         newregion = ARGS.n
-        oldregion = _findregion()
+        oldregion = _findregion(DATAFILE)
 
         if oldregion != newregion:
             _convertregion(newregion, oldregion)
         else:
             print "No point in converting to the same region"
     else:
-        print _findregion()
+        print _findregion(DATAFILE)
 
 _main()
