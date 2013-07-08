@@ -39,6 +39,17 @@ USA = '43fa000a4eb803646000057a60'
 JAP = '21fc00000280fd024bf900a120'
 EUR = '43fa000a4eb803646000056460'
 
+# Regions we support converting to/from
+USAREGION = 'USA'
+JAPREGION = 'JAP'
+EURREGION = 'EUR'
+
+# Property files. Currently not bundled
+USAPROPBIN = 'us_prop.bin'
+JAPPROPBIN = 'jp_prop.bin'
+EURPROPBIN = 'eu_prop.bin'
+
+# File hanldes
 DATAFILE = io.FileIO(ARGS.filename,'r')
 CONVERTEDISO = io.FileIO('converted.iso','w')
 
@@ -83,21 +94,21 @@ def _findregion():
 def _convertregion(newregion=str, oldregion=str):
     '''_convertregions - convert from one region to another'''
 
-    if newregion == 'USA':
-        if oldregion == 'EUR':
-            _copybase(DATAFILE, CONVERTEDISO, 'EUR', 'USA')
-        elif oldregion == 'JAP':
-            _copybase(DATAFILE, CONVERTEDISO, 'JAP', 'USA')
-    elif newregion == 'JAP':
-        if oldregion == 'USA':
-            _copybase(DATAFILE, CONVERTEDISO, 'USA', 'JAP')
-        if oldregion == 'EUR':
-            _copybase(DATAFILE, CONVERTEDISO, 'EUR', 'JAP')
-    elif newregion == 'EUR':
-        if oldregion == 'USA':
-            _copybase(DATAFILE, CONVERTEDISO, 'USA', 'EUR')
-        if oldregion == 'JAP':
-            _copybase(DATAFILE, CONVERTEDISO, 'JAP', 'EUR')
+    if newregion == USAREGION:
+        if oldregion == EURREGION:
+            _copybase(DATAFILE, CONVERTEDISO, EURREGION, USAREGION)
+        elif oldregion == JAPREGION:
+            _copybase(DATAFILE, CONVERTEDISO, JAPREGION, USAREGION)
+    elif newregion == JAPREGION:
+        if oldregion == USAREGION:
+            _copybase(DATAFILE, CONVERTEDISO, USAREGION, JAPREGION)
+        if oldregion == EURREGION:
+            _copybase(DATAFILE, CONVERTEDISO, EURREGION, JAPREGION)
+    elif newregion == EURREGION:
+        if oldregion == USAREGION:
+            _copybase(DATAFILE, CONVERTEDISO, USAREGION, EURREGION)
+        if oldregion == JAPREGION:
+            _copybase(DATAFILE, CONVERTEDISO, JAPREGION, EURREGION)
     else:
         print "Invalid region"
 
@@ -105,7 +116,7 @@ def _findnextgap(start):
     '''_findnextgap - given a location find the next 8byte gap'''
     
     DATAFILE.seek(start)
-    count = 0;
+    count = 0
     zero = '\x00\x00'
     space = '\x20\x20'
 
@@ -130,22 +141,22 @@ def _copybase(sourceiso=io.FileIO, newiso=io.FileIO, oldregion=str,
 
     baselength = 512
 
-    if newregion == 'USA':
-        propbin = 'us_prop.bin'
-    elif newregion == 'JAP':
-        propbin = 'jp_prop.bin'
-    elif newregion == 'EUR':
-        propbin = 'eu_prop.bin'
+    if newregion == USAREGION:
+        propbin = USAPROPBIN
+    elif newregion == JAPREGION:
+        propbin = JAPPROPBIN
+    elif newregion == EURREGION:
+        propbin = EUPROPBIN
     else:
         print "Unknown region. Aborting"
         sys.exit()
 
-    if oldregion == 'USA':
-        oldpropbin = 'us_prop.bin'
-    elif oldregion == 'JAP':
-        oldpropbin = 'jp_prop.bin'
-    elif oldregion == 'EUR':
-        oldpropbin = 'eu_prop.bin'
+    if oldregion == USAREGION:
+        oldpropbin = USAPROPBIN
+    elif oldregion == JAPREGION:
+        oldpropbin = JAPPROPBIN
+    elif oldregion == EURREGION:
+        oldpropbin = EURPROPBIN
     else:
         print "Unknown region. Aborting"
         sys.exit()
