@@ -45,7 +45,7 @@ USAPROPBIN = 'us_prop.bin'
 JAPPROPBIN = 'jp_prop.bin'
 EURPROPBIN = 'eu_prop.bin'
 
-# File hanldes
+# File handles
 DATAFILE = io.FileIO(ARGS.filename,'r')
 
 def _findemptyregions(filebegin=0, fileend=os.stat(ARGS.filename).st_size):
@@ -79,20 +79,22 @@ def _findregion(sourceiso=io.FileIO):
     sourceiso.seek(0x200)
     strip = sourceiso.read(13)
 
-    USAP = io.FileIO(USAPROPBIN, 'r')
-    JAPP = io.FileIO(JAPPROPBIN, 'r')
-    EURP = io.FileIO(EURPROPBIN, 'r')
+    usap = io.FileIO(USAPROPBIN, 'r')
+    japp = io.FileIO(JAPPROPBIN, 'r')
+    eurp = io.FileIO(EURPROPBIN, 'r')
 
-    if strip == USAP.read(13):
+    if strip == usap.read(13):
         region = USAREGION
-    elif strip == JAPP.read(13):
+    elif strip == japp.read(13):
         region = JAPREGION
-    elif strip == EURP.read(13):
+    elif strip == eurp.read(13):
         region = EURREGION
+    else:
+        region = None
 
-    USAP.close()
-    JAPP.close()
-    EURP.close()
+    usap.close()
+    japp.close()
+    eurp.close()
 
     return region
 
