@@ -32,6 +32,8 @@ PARSER.add_argument('-c', '--convert', action="store_true",
                     help='convert to a new region')
 PARSER.add_argument('-n', choices=['USA', 'JAP', 'EUR'],
                     help='name of new region')
+PARSER.add_argument('-o',
+                    help='name of new region')
 
 ARGS = PARSER.parse_args()
 
@@ -102,7 +104,13 @@ def _findregion(sourceiso=io.FileIO):
 def _convertregion(newregion=str, oldregion=str):
     '''_convertregions - convert from one region to another'''
 
-    CONVERTEDISO = io.FileIO('converted.iso','w')
+    if ARGS.o:
+        outputfile = ARGS.o
+    else:
+        filename, fileextension = os.path.splitext(DATAFILE.name)
+        outputfile = filename + newregion + fileextension
+
+    CONVERTEDISO = io.FileIO(outputfile, 'w')
 
     if newregion == USAREGION:
         if oldregion == EURREGION:
