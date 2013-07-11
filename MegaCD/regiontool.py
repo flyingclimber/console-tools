@@ -49,30 +49,25 @@ EURPROPBIN = 'eu_prop.bin'
 # File handles
 DATAFILE = io.FileIO(ARGS.filename,'r')
 
-def _findemptyregions(filebegin=0, fileend=os.stat(ARGS.filename).st_size):
-    '''_findemptyregions - scans an ISO for LENGTH byte to find zeros or
-        spaces
+def _isemptyregion(filebegin, fileend,sourceiso=io.FileIO):
+    '''_isemptyregion - given two regions return true of false if their empty
     '''
 
     zero = '\x00\x00\x00\x00\x00\x00\x00\x00'
     space = '\x20\x20\x20\x20\x20\x20\x20\x20'
     length = 8
-    found = False
+    found = True
 
-    DATAFILE.seek(filebegin)
-    byte = DATAFILE.read(length)
+    sourceiso.seek(filebegin)
+    byte = sourceiso.read(length)
 
     while DATAFILE.tell() != fileend:
-        if byte == zero or byte == space:
-            if found != True:
-                start = DATAFILE.tell() - length
-                found = True
-        elif found == True:
-            end = DATAFILE.tell() - length
-            print start, "-", end, "|", end - start
+        if byte != zero or byte != space:
             found = False
-
+            break
         byte = DATAFILE.read(8)
+
+    return found
 
 def _findregion(sourceiso=io.FileIO):
     '''_findregion - find the region of a MegaCD game'''
