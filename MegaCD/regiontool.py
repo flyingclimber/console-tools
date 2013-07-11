@@ -32,8 +32,7 @@ PARSER.add_argument('-c', '--convert', action="store_true",
                     help='convert to a new region')
 PARSER.add_argument('-n', choices=['USA', 'JAP', 'EUR'],
                     help='name of new region')
-PARSER.add_argument('-o',
-                    help='name of new region')
+PARSER.add_argument('-o', help='output filename')
 
 ARGS = PARSER.parse_args()
 
