@@ -77,17 +77,18 @@ def _findregion(sourceiso=io.FileIO):
     '''_findregion - find the region of a MegaCD game'''
 
     sourceiso.seek(0x200)
-    strip = sourceiso.read(13)
+    striplength = 13
+    strip = sourceiso.read(striplength)
 
     usap = io.FileIO(USAPROPBIN, 'r')
     japp = io.FileIO(JAPPROPBIN, 'r')
     eurp = io.FileIO(EURPROPBIN, 'r')
 
-    if strip == usap.read(13):
+    if strip == usap.read(striplength):
         region = USAREGION
-    elif strip == japp.read(13):
+    elif strip == japp.read(striplength):
         region = JAPREGION
-    elif strip == eurp.read(13):
+    elif strip == eurp.read(striplength):
         region = EURREGION
     else:
         region = None
