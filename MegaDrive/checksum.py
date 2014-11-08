@@ -19,7 +19,7 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-    checksum - calculate the checksum for a Genesis ROM
+    checksum - calculate the checksum for a MegaDrive ROM
 '''
 
 import io
@@ -36,7 +36,8 @@ ARGS = PARSER.parse_args()
 DATAFILE = io.FileIO(ARGS.filename,'r')
 
 def _findchecksum():
-    '''Calculate checksum and return high 16bits'''
+    '''_findchecksum - calculate checksum and return high 16 bits'''
+
     DATAFILE.seek(0x200)
     checksum = 0
     
@@ -50,12 +51,22 @@ def _findchecksum():
         
     return checksum & 0xFFFF
 
+def _readheaderchecksum():
+    '''_readheaderchecksum - reading checksum value in header'''
+    DATAFILE.seek(0x18E)
+    checksum = DATAFILE.read(2)
+
+    return checksum
+
 def _main():
-    '''MAIN'''
+    '''_main - master of all'''
+
+    headerchecksum = _readheaderchecksum()
+    calculatedchecksum = _findchecksum()
     
-    checksum = _findchecksum()
+    print "Header: 0x" + headerchecksum.encode('hex')
+    print "Calculated: " + hex(calculatedchecksum)
     
-    print "Checksum: " + hex(checksum)
     DATAFILE.close()
     
 _main()
