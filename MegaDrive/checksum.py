@@ -19,26 +19,32 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-    checksum - calculate the checksum for a MegaDrive ROM
+    checksum - multi function MegaDrive rom checksum tool
 '''
 
-import io
+import io, os, binascii
 import argparse
 
 PARSER = argparse.ArgumentParser(
     description='Simple MegaDrive checksum reader/writter')
-
 PARSER.add_argument('filename', metavar='filename', type=str,
                         help='rom image to read')
+PARSER.add_argument('-f', '--fix', action="store_true",
+                    help='fix checksum')
+PARSER.add_argument('-o', help='output filename')
 
 ARGS = PARSER.parse_args()
 
+ROMBEGIN = 0x0
+CHECKSUMLOCATION = 0x18E
+GAMECODEBEGIN = 0x200
+
 DATAFILE = io.FileIO(ARGS.filename,'r')
 
-def _findchecksum():
-    '''_findchecksum - calculate checksum and return high 16 bits'''
+def _calculatechecksum():
+    '''_calculatechecksum - calculate checksum and return high 16 bits'''
 
-    DATAFILE.seek(0x200)
+    DATAFILE.seek(GAMECODEBEGIN)
     checksum = 0
     
     while True:
@@ -49,24 +55,48 @@ def _findchecksum():
         checksum += ord(snip) * 256
         checksum += ord(DATAFILE.read(1))
         
-    return checksum & 0xFFFF
+    return int(checksum & 0xFFFF)
 
 def _readheaderchecksum():
     '''_readheaderchecksum - reading checksum value in header'''
-    DATAFILE.seek(0x18E)
+    DATAFILE.seek(CHECKSUMLOCATION)
     checksum = DATAFILE.read(2)
 
-    return checksum
+    return int(binascii.hexlify(checksum), 16)
+
+def _fixheaderchecksum(calculatedchecksum):
+    '''_fixheaderchecksum - create a copy rom with new calculatedchecksum'''
+
+    if ARGS.o:
+        outputfile = ARGS.o
+    else:
+        filename, fileextension = os.path.splitext(DATAFILE.name)
+        outputfile = filename + " fixed" + fileextension
+
+    DATAFILE.seek(ROMBEGIN)
+
+    copy = io.FileIO(outputfile, 'wb')
+    copy.write(DATAFILE.read(CHECKSUMLOCATION))
+    copy.write(binascii.unhexlify(format(calculatedchecksum,'x')))
+    DATAFILE.read(2)
+    copy.write(DATAFILE.read())
+    copy.close()
 
 def _main():
     '''_main - master of all'''
 
     headerchecksum = _readheaderchecksum()
-    calculatedchecksum = _findchecksum()
+    calculatedchecksum = _calculatechecksum()
     
-    print "Header: 0x" + headerchecksum.encode('hex')
+    print "Header: " + hex(headerchecksum)
     print "Calculated: " + hex(calculatedchecksum)
     
+    if ARGS.fix:
+        if headerchecksum == calculatedchecksum:
+            print ("Checksums match. Nothing to do")
+        else:
+            _fixheaderchecksum(calculatedchecksum)
+
     DATAFILE.close()
     
 _main()
