@@ -3,7 +3,7 @@
 '''
     console-tools - Tools for various consoles
 
-    Copyright (C) 2013, Tomasz Finc <tomasz@gmail.com>
+    Copyright (C) 2014, Tomasz Finc <tomasz@gmail.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,7 +58,8 @@ def _calculatechecksum():
     return int(checksum & 0xFFFF)
 
 def _readheaderchecksum():
-    '''_readheaderchecksum - reading checksum value in header'''
+    '''_readheaderchecksum - read header checksum value'''
+
     DATAFILE.seek(CHECKSUMLOCATION)
     checksum = DATAFILE.read(2)
 
@@ -70,7 +71,7 @@ def _fixheaderchecksum(calculatedchecksum):
     if ARGS.o:
         outputfile = ARGS.o
     else:
-        filename, fileextension = os.path.splitext(DATAFILE.name)
+        filename, fileextension = os.path.splitext(os.path.basename(DATAFILE.name))
         outputfile = filename + " fixed" + fileextension
 
     DATAFILE.seek(ROMBEGIN)
