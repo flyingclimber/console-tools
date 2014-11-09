@@ -71,7 +71,8 @@ def _fixheaderchecksum(calculatedchecksum):
     if ARGS.o:
         outputfile = ARGS.o
     else:
-        filename, fileextension = os.path.splitext(os.path.basename(DATAFILE.name))
+        filename, fileextension = os.path.splitext(
+            os.path.basename(DATAFILE.name))
         outputfile = filename + " fixed" + fileextension
 
     DATAFILE.seek(ROMBEGIN)
